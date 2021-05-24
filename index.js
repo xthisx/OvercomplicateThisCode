@@ -1,25 +1,30 @@
-const fs = require("fs");
+const fs = require('fs');
+const https = require('https');
 
-let p = fs.readFileSync('./potato.png');
+https.get('https://raw.githubusercontent.com/emn178/js-sha256/master/src/sha256.js', (res) => {
+  const path = './sha256.js';
+  const filePath = fs.createWriteStream(path);
+  res.pipe(filePath);
+  filePath.on('finish', () => {
+    filePath.close();
+    const sha256 = require('./sha256');
 
-function main() {
-  let var1 = "";
-  let var2 = "";
-  
-  fs.readFile('./hi', 'utf8' , (err, data) => {
-    if (err) {
-      console.error(err)
-      return
-    }
-    var1 = data;
-    fs.readFile('./hi2', 'utf8' , (err, data) => {
-      if (err) {
-        console.error(err)
-        return
+
+    let success = false;
+    while (!success) {
+      let firstTwelveLettersOfHash = sha256.array(fs.readFileSync('./index.js'))
+        .slice(0, 12);
+
+      firstTwelveLettersOfHash = String.fromCharCode(...firstTwelveLettersOfHash);
+      console.log(firstTwelveLettersOfHash);
+      if (firstTwelveLettersOfHash === 'Hello World!') {
+        console.log(firstTwelveLettersOfHash);
+        success = true;
+      } else {
+        fs.appendFileSync('./index.js', Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5));
       }
-      var2 = data.substring(0, data.length-1);
-      console.log((var2.replace(var2, var1))+" "+(var1.replace(var1, var2)+"!"));
-    })
+    }
   })
-}
-main();
+})
+
+//
